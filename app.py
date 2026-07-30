@@ -1,11 +1,17 @@
 import streamlit as st
 import time
 
+from agent_loader import load_agent_components
+
 # Safely import agent modules if available in user's environment
-try:
-    from agents import build_reader_agent, build_search_agent, writer_chain, critic_chain
-except ImportError:
-    pass
+components, import_error = load_agent_components()
+build_reader_agent = components["build_reader_agent"]
+build_search_agent = components["build_search_agent"]
+writer_chain = components["writer_chain"]
+critic_chain = components["critic_chain"]
+
+if import_error is not None:
+    st.session_state.setdefault("agent_import_error", str(import_error))
 
 # ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -14,6 +20,11 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+
+if import_error is not None:
+    st.warning(
+        "Agent components could not be loaded. The app will show a friendly fallback message until the environment is fixed."
+    )
 
 # ── Custom CSS & Enhanced Three.js 3D Background Canvas ────────────────────────
 st.markdown("""
@@ -671,6 +682,12 @@ if run_btn:
         st.rerun()
 
 if st.session_state.running and not st.session_state.done:
+    if import_error is not None or None in (build_search_agent, build_reader_agent, writer_chain, critic_chain):
+        st.session_state.running = False
+        st.session_state.done = True
+        st.error("The research pipeline could not start because the agent components are unavailable in this environment.")
+        st.stop()
+
     results = {}
     topic_val = st.session_state.topic_input
 
