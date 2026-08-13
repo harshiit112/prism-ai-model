@@ -160,4 +160,4 @@ If you are a recruiter looking at this repository, here are some highlights of t
 
 ---
 
-_Developed by Harshit Kumar (harshiit112) — Building intelligent agentic systems._
+_Developed by Harshit Verma (harshiit112) — Building intelligent agentic systems._
